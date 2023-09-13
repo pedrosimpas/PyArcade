@@ -2,7 +2,7 @@ ________________________________________________
 <div align="center">
 meuPyArcade
 
-A python library for styling your plots
+Codigos em python para aprender a usar o arcade.
 
 Creation date: 27 Dezembro 2022          
 Criado po
