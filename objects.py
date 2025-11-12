@@ -1,7 +1,14 @@
 import arcade
-import numpy as np
+from numpy import array, random 
 from hitbox import Circle_Hit_Box, Hit_Box
-import random
+from os import path
+import sys
+
+def resource_path(relative_path: str) -> str:
+    """Return absolute path to resource, works for dev and for PyInstaller bundle."""
+    base_path = getattr(sys, '_MEIPASS', path.abspath("."))
+    return path.join(base_path, relative_path)
+
 
 class ScreenObject():
     def __init__(self) -> None:
@@ -21,7 +28,7 @@ class Player(ScreenObject):
 
         self.player_size : float = self.SCREEN_WIDTH/50
 
-        self.posicao = np.array([self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2])
+        self.posicao = array([self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2])
         self.hit_box = Circle_Hit_Box(Npontos = 4, raio = self.player_size)
 
     def Mover(self, inInputKey, **kwargs):
@@ -61,7 +68,9 @@ class Frutas(ScreenObject):
         self.SCREEN_HEIGHT  = SCREEN_HEIGHT
         self.SCREEN_WIDTH   = SCREEN_WIDTH
         self.SPRITE_SCALING = SPRITE_SCALING
-        self._sprite = arcade.Sprite("./sprites/fruta_jogo.png", self.SPRITE_SCALING)
+        self._sprite_list   = arcade.SpriteList()
+        self._sprite = arcade.Sprite(resource_path("sprites/fruta_jogo.png"), self.SPRITE_SCALING)
+        self._sprite_list.append(self._sprite)
 
         self._sprite.center_x, self._sprite.center_y = self.SCREEN_WIDTH/2 + 50, self.SCREEN_HEIGHT/2 + 50
 
@@ -72,7 +81,7 @@ class Frutas(ScreenObject):
         self._sprite.center_y = kwargs["y"]
 
     def Desenhar(self, **kwargs):
-        self._sprite.draw()
+        self._sprite_list.draw()
 
     def Colidir(self, **kwargs):
         pass 
@@ -100,18 +109,22 @@ class PowerUpsList():
         self.SCREEN_HEIGHT   = SCREEN_HEIGHT
         self.SCREEN_WIDTH    = SCREEN_WIDTH
         self.Npowerups       = Npowerups
-        self.Colisor         = Colisor_Lista_Fruta(np.array([]), np.array([]), self.SCREEN_WIDTH/50)
-        self.lista_powerups = np.array([Frutas(self.SCREEN_WIDTH, self.SCREEN_HEIGHT) for _ in range(self.Npowerups)])
+        self.Colisor         = Colisor_Lista_Fruta(array([]), array([]), self.SCREEN_WIDTH/50)
+        self.lista_powerups = array([Frutas(self.SCREEN_WIDTH, self.SCREEN_HEIGHT) for _ in range(self.Npowerups)])
 
-        self.lista_powerups = np.array(self.lista_powerups)
         self.Mover(False, mover_poweups = True)
 
+
+    def Resetar(self) : 
+        self.Colisor         = Colisor_Lista_Fruta(array([]), array([]), self.SCREEN_WIDTH/50)
+        self.lista_powerups = array([Frutas(self.SCREEN_WIDTH, self.SCREEN_HEIGHT) for _ in range(self.Npowerups)])
+        self.Mover(False, mover_poweups = True)        
 
     def Mover(self, inInputKey, **kwargs):
         if kwargs["mover_poweups"]:
             self.Colisor.Redefinir_Posicoes(
-                                             np.random.uniform(0, self.SCREEN_WIDTH, len(self.lista_powerups)),
-                                             np.random.uniform(0, self.SCREEN_HEIGHT, len(self.lista_powerups))
+                                             random.uniform(0, self.SCREEN_WIDTH, len(self.lista_powerups)),
+                                             random.uniform(0, self.SCREEN_HEIGHT, len(self.lista_powerups))
             )
             for ipu, poweup in enumerate(self.lista_powerups):
                 poweup.Mover(
